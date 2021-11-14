@@ -4,7 +4,7 @@ open Lexer
 let create_hash (size: int) : (string, string) Hashtbl.t = Hashtbl.create size
 
 (* Print to stdout the contents of a hash table where both key and content are strings *)
-let print_hash (ht : (string, string) Hashtbl.t) = Hashtbl.iter (fun x y -> Printf.printf "{ %s : %s }\n" x y) ht
+let print_hash (ht : (string, string) Hashtbl.t) = Hashtbl.iter (fun x y -> Printf.printf "{ %s       ~>       %s }\n" x y) ht
 
 (* Function that receive a lexeme and a hash table. Pattern match the lexeme, and then add it to the hash table *)
 let to_table x ht =
