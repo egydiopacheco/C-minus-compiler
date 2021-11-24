@@ -1,0 +1,14 @@
+(ocamllex
+  (modules lexer)
+)
+
+(menhir
+  (modules parser)
+  (flags -lg 1 -la 1 -lc 2)
+)
+
+(executable
+ (name main)
+ (flags -w A-4-70)
+ (libraries core menhirLib)
+)
