@@ -1,0 +1,7 @@
+/*  Error since var declaration is not inside any scope */
+int x = 3;
+int y = 0;
+while (x == 3)
+{
+	y = y + 1;	
+}

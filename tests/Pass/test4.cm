@@ -1,0 +1,13 @@
+int some (int x)
+{
+	int y; int z;
+	if (x > 0)
+	{
+		y = y + 1;
+	}
+	else
+	{
+		z = z + 1;
+	}
+	return y + z;
+}

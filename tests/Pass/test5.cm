@@ -1,0 +1,14 @@
+void foo (int y, int z)
+{
+	if (y > 0)
+	{
+		if (z > 1)
+		{
+			y = y + 1;
+		}
+		else
+		{
+			z = z + 1;
+		}
+	}
+}

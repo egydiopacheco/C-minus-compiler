@@ -1,0 +1,11 @@
+int main ()
+{
+	int y;
+
+	int void(int z) /* Cant declare functions inside functions */
+	{
+		z = z + 1;
+		return z;
+	}
+	return y;
+}
