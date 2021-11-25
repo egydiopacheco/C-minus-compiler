@@ -16,74 +16,76 @@ open Ast
 
 %start program
 %type <Ast.program> program
+
 %%
 
-program: dl = list_decl EOF { List.rev dl }
+let program :=
+dl = list_decl; EOF; { List.rev dl }
 
-list_decl:
-  | dl = list_decl; d = decl
+let list_decl :=
+  | dl = list_decl; d = decl;
     { d :: dl }
-  | d = decl
+  | d = decl;
     { [ d ] }
 
-decl:
-  | vd = var_decl
+let decl :=
+  | vd = var_decl;
     {
       match vd with
-      | VarSpecs(typ, name) -> SetVar(typ, name)
-      | ArrSpecs(typ, name, size) -> SetArr(typ, name, size)
+      | VarSpecs(typespec, name) -> SetVar(typespec, name)
+      | ArrSpecs(typespec, name, index) -> SetArr(typespec, name, index)
     }
-  | fd = fun_decl
+  | fd = fun_decl;
     { fd }
 
-var_decl:
-  | t = type_spec; i = ID; SEMI	
+let var_decl :=
+  | t = type_spec; i = ID; SEMI;
     { VarSpecs(t, i) }
-  | t = type_spec; i = ID; LBRACKET; n = INT; RBRACKET; SEMI
+  | t = type_spec; i = ID; LBRACKET; n = INT; RBRACKET; SEMI;
     { ArrSpecs(t, i, n) }
 
-type_spec: 
-  | INT_TYPE	
+let type_spec := 
+  | INT_TYPE;
     { TInt }
-  | VOID_TYPE	
+  | VOID_TYPE;	
     { TVoid }
 
-fun_decl:
-  | t = type_spec; i =  ID; LPAREN; p = params; RPAREN; ss = stmt_scope
+let fun_decl :=
+  | t = type_spec; i =  ID; LPAREN; p = params; RPAREN; ss = stmt_scope;
     {
       match ss with
       | (variables, statements) -> SetFunc(t, i, p, variables, statements)
     }
 
-params:
-  | pl = param_list
+let params :=
+  | pl = param_list;
     { List.rev pl }
-  | VOID_TYPE
+  | VOID_TYPE;
     { [] }
 
-param_list:
-  | pl = param_list ; COMMA; p = param
+let param_list :=
+  | pl = param_list ; COMMA; p = param;
     { p :: pl }
-  | p = param
+  | p = param;
     { [ p ] }
 
-param:
-  | t = type_spec; i = ID 
+let param :=
+  | t = type_spec; i = ID ;
     { VarParams(t, i) }
-  | t = type_spec; i = ID; LBRACKET RBRACKET
+  | t = type_spec; i = ID; LBRACKET; RBRACKET;
     { ArrParams(t, i) }
 
-stmt_scope:
-  | LBRACE; ld = local_decl; sl = stmt_list; RBRACE	
+let stmt_scope :=
+  | LBRACE; ld = local_decl; sl = stmt_list; RBRACE;
     { (List.rev ld, List.rev sl) }
 
-local_decl:
-  | ld = local_decl; v = var_decl
+let local_decl :=
+  | ld = local_decl; v = var_decl;
     { v :: ld }
   | { [] }
 
-stmt_list:
-  | sl = stmt_list; st = stmt
+let stmt_list :=
+  | sl = stmt_list; st = stmt;
     {
       match st with
       | ExprDecl None -> sl
@@ -91,61 +93,64 @@ stmt_list:
     }
   | { [] }
 
-stmt:
-  | es = expr_stmt
+let stmt :=
+  | es = expr_stmt;
     { es }
-  | ss = stmt_scope
+  | ss = stmt_scope;
     {
       match ss with
       | (variables, statements) -> ScopeDecl(variables, statements)
     }
-  | cs = cond_stmt
+  | cs = cond_stmt;
     { cs }
-  | is = iter_stmt
+  | is = iter_stmt;
     { is }
-  | rs = return_stmt		
+  | rs = return_stmt;		
     { rs }
 
-expr_stmt:
-  | e = expr; SEMI
+let expr_stmt :=
+  | e = expr; SEMI;
     { ExprDecl(Some e) }
-  | SEMI 
+  | SEMI;
     { ExprDecl(None) }
 
-cond_stmt:
-  | IF; LPAREN; e = expr; RPAREN; st = stmt
+
+let cond_stmt :=
+  | IF; LPAREN; e = expr; RPAREN; st = stmt;
     { CondDecl(e, st, None) } %prec THEN
-  | IF; LPAREN; e = expr; RPAREN; st = stmt; ELSE; st2 = stmt
+  | IF; LPAREN; e = expr; RPAREN; st = stmt; ELSE; st2 = stmt;
     { CondDecl(e, st, Some st2) }
 
-iter_stmt:
-  | WHILE; LPAREN; e = expr; RPAREN; st = stmt
+
+let iter_stmt :=
+  | WHILE; LPAREN; e = expr; RPAREN; st = stmt;
     { WhileDecl(e, st) }
 
-return_stmt:
-  | RETURN SEMI 
+let return_stmt :=
+  | RETURN; SEMI;
     { RetDecl(None) }
-  | RETURN; e = expr; SEMI
+  | RETURN; e = expr; SEMI;
     { RetDecl(Some e) }
 
-expr:
-  | v = var; ASSIGN; e = expr
+let expr :=
+  | v = var; ASSIGN; e = expr;
     {
       match v with
       | (name, option) -> match option with
 			  | None -> AssignExpr(name, e) 
 			  | Some expr -> AssignArr(name, expr, e)
     }
-  | se = simple_expr { se }
+  | se = simple_expr;
+    { se }
 
-var:
-  | i = ID
+let var :=
+  | i = ID;
     { (i, None) }
-  | i = ID; LBRACKET; e = expr; RBRACKET
+  | i = ID; LBRACKET; e = expr; RBRACKET;
     { (i, Some e) }
 
-simple_expr:
-  | ae1 = add_expr; re = relop; ae2 = add_expr
+let simple_expr :=
+  | ae1 = add_expr; re = relop; ae2 = add_expr;
     {
       AssignLogic (
 	  match re with
@@ -158,51 +163,51 @@ simple_expr:
 	  | _ -> failwith "Implement error handling"
 	)	
     }
-  | ae = add_expr
+  | ae = add_expr;
     { AssignMath ae }
 
-relop:
-  | LEQ	{ LEQ }
-  | LT	{ LT }
-  | GT  { GT }
-  | GEQ { GEQ }
-  | EQ  { EQ }
-  | NEQ { NEQ }
+let relop :=
+  | LEQ; { LEQ }
+  | LT;	 { LT }
+  | GT;  { GT }
+  | GEQ; { GEQ }
+  | EQ;  { EQ }
+  | NEQ; { NEQ }
 
-add_expr:
-  | ae = add_expr; ao = add; t = term
+let add_expr :=
+  | ae = add_expr; ao = additive_operator; t = term;
     {						
       match ao with
       | PLUS -> Add(ae, t)
       | MINUS -> Sub(ae, t)
       | _ -> failwith "Implement error handling"				
     }
-  | t = term	
+  | t = term;
     { t }
 
-add:
-  | PLUS  { PLUS }
-  | MINUS { MINUS }
+let additive_operator ==
+  | PLUS;  { PLUS }
+  | MINUS; { MINUS }
 
-term:
-  | t = term; m = mult; f = factor
+let term :=
+  | t = term; m = multiplicative_operator; f = factor;
     {					
       match m with
       | TIMES -> Mult(t, f)
       | DIV -> Div(t, f)
       | _ -> failwith "Implement error handling"	
     }
-  | f = factor
+  | f = factor;
     { f }
 
-mult:
-  | TIMES { TIMES }
-  | DIV { DIV }
+let multiplicative_operator ==
+  | TIMES; { TIMES }
+  | DIV; { DIV }
 
-factor:
-  | LPAREN; e = expr; RPAREN
+let factor :=
+  | LPAREN; e = expr; RPAREN;
     { Expr e }
-  | v = var
+  | v = var;
     {								
       match v with
       | (name, option) -> 
@@ -210,24 +215,24 @@ factor:
 	 | None -> Var name
 	 | Some expr -> Arr(name, expr)
     }
-  | c = call
+  | c = call;
     { c }
-  | n = INT
+  | n = INT;
     { Int n }
 
-call:
-  | i = ID; LPAREN; a = args; RPAREN
+let call :=
+  | i = ID; LPAREN; a = args; RPAREN;
     { Call(i, a) }
 
-args:
-  | al = arg_list
+let args :=
+  | al = arg_list;
     { List.rev al }
   |
     { [] }
 
-arg_list:
-  | al = arg_list; COMMA; e = expr
+let arg_list :=
+  | al = arg_list; COMMA; e = expr;
     { e :: al }
-  | e = expr
+  | e = expr;
     { [ e ] }
 
