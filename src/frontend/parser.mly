@@ -10,7 +10,9 @@ open Ast
 %token ASSIGN SEMI COMMA
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token EOF
+%token THEN
 
+%right THEN ELSE
 
 %start program
 %type <Ast.program> program
@@ -28,8 +30,8 @@ decl:
   | vd = var_decl
     {
       match vd with
-      | VarSpecs(typespec, name) -> SetVar(typespec, name)
-      | ArrSpecs(typespec, name, index) -> SetArr(typespec, name, index)
+      | VarSpecs(typ, name) -> SetVar(typ, name)
+      | ArrSpecs(typ, name, size) -> SetArr(typ, name, size)
     }
   | fd = fun_decl
     { fd }
@@ -112,7 +114,7 @@ expr_stmt:
 
 cond_stmt:
   | IF; LPAREN; e = expr; RPAREN; st = stmt
-    { CondDecl(e, st, None) }
+    { CondDecl(e, st, None) } %prec THEN
   | IF; LPAREN; e = expr; RPAREN; st = stmt; ELSE; st2 = stmt
     { CondDecl(e, st, Some st2) }
 
