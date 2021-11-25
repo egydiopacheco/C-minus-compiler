@@ -32,8 +32,8 @@ let decl :=
   | vd = var_decl;
     {
       match vd with
-      | VarSpecs(typespec, name) -> SetVar(typespec, name)
-      | ArrSpecs(typespec, name, index) -> SetArr(typespec, name, index)
+      | VarSpecs(typ, name) -> SetVar(typ, name)
+      | ArrSpecs(typ, name, size) -> SetArr(typ, name, size)
     }
   | fd = fun_decl;
     { fd }
@@ -166,7 +166,7 @@ let simple_expr :=
   | ae = add_expr;
     { AssignMath ae }
 
-let relop :=
+let relop ==
   | LEQ; { LEQ }
   | LT;	 { LT }
   | GT;  { GT }
