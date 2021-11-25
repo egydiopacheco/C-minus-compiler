@@ -1,14 +1,13 @@
 %{
 open Ast
-exception Incorrect_Syntax
 %}
 
 %token <int> INT
 %token <string> ID
-%token ELSE IF RETURN VOID_TYPE INT_TYPE WHILE
-%token PLUS MINUS TIMES DIV 
+%token IF ELSE VOID_TYPE INT_TYPE WHILE RETURN
+%token PLUS MINUS TIMES DIV
 %token LT LEQ GT GEQ EQ NEQ
-%token ASSIGN SEMI COMMA 
+%token ASSIGN SEMI COMMA
 %token LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token EOF
 
@@ -17,8 +16,7 @@ exception Incorrect_Syntax
 %type <Ast.program> program
 %%
 
-program:
-dl = list_decl EOF { List.rev dl }
+program: dl = list_decl EOF { List.rev dl }
 
 list_decl:
   | dl = list_decl; d = decl
@@ -124,17 +122,17 @@ iter_stmt:
 
 return_stmt:
   | RETURN SEMI 
-    { RetDecl (None) }
+    { RetDecl(None) }
   | RETURN; e = expr; SEMI
-    { RetDecl (Some e) }
+    { RetDecl(Some e) }
 
 expr:
   | v = var; ASSIGN; e = expr
     {
       match v with
-      | (name, exprOption) -> match exprOption with
-			      | None -> AssignExpr(name, e) 
-			      | Some expr -> AssignArr(name, expr, e)
+      | (name, option) -> match option with
+			  | None -> AssignExpr(name, e) 
+			  | Some expr -> AssignArr(name, expr, e)
     }
   | se = simple_expr { se }
 
@@ -155,7 +153,7 @@ simple_expr:
 	  | GEQ -> Gte(ae1, ae2)
 	  | EQ -> Eq(ae1, ae2)
 	  | NEQ -> Neq(ae1, ae2)
-	  | _ -> raise Incorrect_Syntax
+	  | _ -> failwith "Implement error handling"
 	)	
     }
   | ae = add_expr
@@ -175,7 +173,7 @@ add_expr:
       match ao with
       | PLUS -> Add(ae, t)
       | MINUS -> Sub(ae, t)
-      | _ -> raise Incorrect_Syntax						
+      | _ -> failwith "Implement error handling"				
     }
   | t = term	
     { t }
@@ -190,7 +188,7 @@ term:
       match m with
       | TIMES -> Mult(t, f)
       | DIV -> Div(t, f)
-      | _ -> raise Incorrect_Syntax	
+      | _ -> failwith "Implement error handling"	
     }
   | f = factor
     { f }
